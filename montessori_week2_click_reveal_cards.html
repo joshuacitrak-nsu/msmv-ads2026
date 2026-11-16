@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Montessori Coding & AI — Week 2 | Click-Reveal Cards</title>
+<style>
+:root { color-scheme: light; --ink:#17243a; --muted:#617084; --line:#dbe4ee; --bg:#f5f7fb; --surface:white; --blue:#476da5; --purple:#7054ad; --teal:#187f87; --green:#28794f; --gold:#a96b18; }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+header { background:#162842; color:white; padding:45px max(22px,calc((100vw - 1160px)/2)) 35px; }
+header .eyebrow { text-transform:uppercase; font-size:13px; font-weight:700; letter-spacing:.12em; color:#b6d9f1; }
+h1 { font-size:clamp(30px,4vw,52px); line-height:1.1; margin:10px 0 15px; }
+header p { max-width:850px; color:#d9e6f4; font-size:17px; line-height:1.6; }
+.chips { display:flex;flex-wrap:wrap; gap:9px; margin-top:18px; }
+.chip { background:#29415e; color:#dbeafb; border-radius:999px; padding:7px 12px; font-size:13px; }
+main { max-width:1160px; padding:0 20px 80px; margin:auto; }
+nav { display:flex; flex-wrap:wrap; gap:9px; padding:17px 0 8px; }
+nav a { text-decoration:none; background:#e7edf5; color:#234260; padding:9px 13px; border-radius:8px; font-size:14px; font-weight:650; }
+nav a:hover {background:#d4e3f5}
+section { padding-top:22px; }
+.section-head { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; margin-top:28px; padding:25px; background:#fff; border-radius:16px; border:1px solid var(--line); }
+.section-head h2 { margin:4px 0; font-size:clamp(24px,3vw,34px); }
+.section-head p { margin:5px 0 0; color:var(--muted); line-height:1.5; max-width:780px; }
+.section-tag { font-weight:800; text-transform:uppercase; letter-spacing:.1em; font-size:12px; color:var(--blue); }
+.example { border:1px solid var(--line); background:white; border-radius:16px; padding:24px; margin-top:18px; box-shadow:0 2px 6px rgba(25,43,68,.035); }
+.example-top { display:flex; justify-content:space-between; flex-wrap:wrap; align-items:start; gap:12px; }
+h3 { margin:0; font-size:21px; }
+.context { color:var(--muted); margin:7px 0 0; line-height:1.55; }
+.question { font-size:17px; font-weight:700; margin:16px 0; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+button { font:inherit; cursor:pointer; border-radius:9px; border:1px solid #b8c8da; padding:9px 13px; background:#fff; color:#2f4e73; font-weight:700; }
+button:focus-visible, .card:focus-visible { outline:3px solid #ffae3d;outline-offset:3px; }
+button.primary { background:#234f88; color:white; border-color:#234f88; }
+button:hover {filter:brightness(.96)}
+.progress { font-size:13px;color:var(--muted); font-weight:650; white-space:nowrap; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; margin-top:20px; }
+.card { position:relative; min-height:160px; border-radius:12px; border:2px solid var(--accent,#7f92af); padding:15px; background:var(--tint,#edf2fa); text-align:left; display:flex; flex-direction:column; justify-content:space-between; transition:background .15s,transform .15s; user-select:none; }
+.card:hover { transform:translateY(-1px); }
+.card .step {font-size:12px; letter-spacing:.085em; text-transform:uppercase; font-weight:800; color:var(--accent,#466287); }
+.card .expression { font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace; font-weight:750; font-size:clamp(14px,1.6vw,19px); line-height:1.5; overflow-wrap:anywhere; color:#14243a; }
+.card .hint { font-size:12px; color:#617084; }
+.card.hidden-card { background:repeating-linear-gradient(-45deg,#edf1f7,#edf1f7 12px,#e5ebf4 12px,#e5ebf4 24px); border-style:dashed; }
+.card.hidden-card .expression {color:#72829a; font-family:inherit; font-size:18px; }
+.card.hidden-card .hint { color:#687b93; }
+.card.hidden-card .step {color:#65758b;}
+.card[data-tone="purple"] {--accent:#8062b7;--tint:#f3effb;}
+.card[data-tone="teal"] {--accent:#27878e;--tint:#eaf7f8;}
+.card[data-tone="green"] {--accent:#328454;--tint:#edf8f0;}
+.card[data-tone="gold"] {--accent:#b27b25;--tint:#fff6e6;}
+.answer-wrap { margin-top:15px; }
+.answer-toggle { border:1px solid #cbd6e2; background:#f4f7fa; color:#41556c; font-size:14px; }
+.answer { margin-top:9px; padding:14px 17px; background:#f0f7f3; border-left:4px solid #3e9366; border-radius:4px 9px 9px 4px; font-size:16px;line-height:1.6; }
+.answer[hidden] {display:none}
+.transition { border-left:5px solid #7f91bc; margin:19px 4px 0; padding:16px 21px; background:#edf1fa; border-radius:0 10px 10px 0; line-height:1.6; }
+.transition strong {display:block;margin-bottom:4px;}
+.lesson-note { margin-top:14px; background:#fff9e9; padding:14px 18px; border-radius:10px; border:1px solid #f1deab; line-height:1.55; }
+.footer {text-align:center; color:var(--muted); font-size:13px; padding-top:40px; }
+code {font-family:ui-monospace,SFMono-Regular,Consolas,monospace;}
+@media(max-width:650px){ .example{padding:16px}.section-head{padding:18px}.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card{padding:10px;min-height:135px}.card .expression{font-size:14px}header{padding:32px 20px} }
+@media print{body{background:white}header{background:white;color:#18253b;padding:15px 0}header p,.chips{color:#18253b}nav,.actions,.answer-toggle{display:none}main{padding:0}.example{break-inside:avoid}.card{min-height:105px}.card.hidden-card .expression{visibility:hidden}}
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Montessori Coding & AI · Grades 7–8</div>
+  <h1>Week 2 — Variables in Action</h1>
+  <p>Instructor presentation: review variables, track state changes and output, build geometry algorithms, and—if time permits—try dice-driven IF/ELSE statements.</p>
+  <div class="chips"><span class="chip">60-minute lesson</span><span class="chip">8 projected card sequences</span><span class="chip">Click cards to reveal</span><span class="chip">Answers stay hidden until requested</span></div>
+</header>
+<main>
+  <nav aria-label="Jump to lesson part"><a href="#review">1 · Variable Review</a><a href="#state">2 · State & Output</a><a href="#geometry">3 · Geometry</a><a href="#dice">4 · Dice / IF–ELSE</a><a href="#close">Closing</a></nav>
+  <div class="lesson-note"><strong>Presenting:</strong> Click a face-down card to reveal that card, or click <strong>Reveal next</strong> to unfold each program in order. Use <strong>Reset</strong> for a fresh run. Answers are hidden separately, so you can let students reason first. The entire lesson scrolls down one page.</div>
+
+  <section id="review">
+    <div class="section-head"><div><div class="section-tag">0–12 minutes · Part 1</div><h2>Variable review + complexity</h2><p>Revisit assignment and reassignment, then add arithmetic and string manipulation.</p></div></div>
+    <div id="ex-1a"></div><div id="ex-1b"></div>
+    <div class="transition"><strong>Talk track</strong>“Last week, we learned that a variable is a name for a stored value. Today our challenge is to follow what happens to that value, one instruction at a time.”</div>
+  </section>
+  <section id="state">
+    <div class="section-head"><div><div class="section-tag">12–25 minutes · Part 2</div><h2>State changes and OUTPUT</h2><p>Show that a program has a current state, and that OUTPUT captures a value at the moment it runs.</p></div></div>
+    <div id="ex-2a"></div><div id="ex-2b"></div>
+    <div class="transition"><strong>Talk track</strong>“The computer does not automatically redo an earlier calculation when a variable changes. It only executes the instructions we give it. What if we wanted these calculations to solve a real problem?”</div>
+  </section>
+  <section id="geometry">
+    <div class="section-head"><div><div class="section-tag">25–48 minutes · Parts 3 & 4</div><h2>Build geometry algorithms</h2><p>Connect stored values to the area formulas students are studying. After examples, let tables create and exchange original algorithms.</p></div></div>
+    <div class="transition"><strong>Intro prompt</strong>“So far, we have been changing numbers just to see what happens. What if our numbers represented something useful—like length and width? Could we build a reusable area calculator?”</div>
+    <div id="ex-3a"></div><div id="ex-3b"></div>
+    <div class="lesson-note"><strong>Table challenge (about 18 minutes):</strong> Choose a rectangle, triangle, parallelogram, or trapezoid. Set dimensions, calculate area, and OUTPUT it. Then change a dimension and add a new calculation. Exchange with another table: can they predict both outputs? <strong>Fast finisher:</strong> change a dimension three times but recalculate area only twice.</div>
+  </section>
+  <section id="dice">
+    <div class="section-head"><div><div class="section-tag">48–57 minutes · Optional Part 5</div><h2>Die rolls and IF / ELSE</h2><p>A stretch goal only if geometry wraps up early. Use a six-sided die to make the value of <code>roll</code> unknown until execution.</p></div></div>
+    <div id="ex-4a"></div><div id="ex-4b"></div>
+  </section>
+  <section id="close">
+    <div class="section-head"><div><div class="section-tag">57–60 minutes · Closing</div><h2>Reflection</h2><p>Why doesn't an earlier calculation update automatically? Why does the order of instructions matter? How is an algorithm different from answering one math question?</p></div></div>
+  </section>
+  <div class="footer">Single-file offline lesson presentation · All cards and interactions are built into this HTML file.</div>
+</main>
+<script>
+const examples = [
+ {id:'1a',tone:'purple',title:'Example 1A · Updating a variable',context:'Predict the final value of x. Reveal one instruction at a time.',question:'What is x at the end?',cards:['SET x = 5','SET x = x + 3','SET x = x × 2','x = ?'],answer:'x = 16. The updates happen in sequence: 5 → 8 → 16.'},
+ {id:'1b',tone:'purple',title:'Example 1B · Removing and adding letters',context:'Define REMOVE FIRST as deleting only the first occurrence of the named text.',question:'What is the final value of word?',cards:['SET word = "ABCD"','SET letter = "B"','SET word = REMOVE FIRST letter FROM word','SET word = word + letter','word = ?'],answer:'word = "ACDB". First remove B from ABCD to get ACD, then append B. Extension: What if word were "BANANA" and you removed ALL "A"?'},
+ {id:'2a',tone:'teal',title:'Example 2A · Multiple outputs',context:'An OUTPUT shows the value at that moment without ending the program.',question:'How many outputs appear, and what are they?',cards:['SET score = 5','SET score = score + 3','OUTPUT score','SET score = score × 2','OUTPUT score'],answer:'Two outputs: 8, then 16.'},
+ {id:'2b',tone:'teal',title:'Example 2B · A calculation does not automatically update',context:'Distinguish the current values of a and b from the stored value of total.',question:'Why are the two outputs different?',cards:['SET a = 3','SET b = 5','SET total = a + b','SET a = 10','OUTPUT total','SET total = a + b','OUTPUT total'],answer:'Outputs: 8, then 15. Changing a did not recalculate total; the later assignment did.'},
+ {id:'3a',tone:'green',title:'Example 3A · Rectangle area calculator',context:'Use the students’ current geometry work to make the variable values meaningful.',question:'What does this algorithm output?',cards:['SET length = 6','SET width = 4','SET area = length × width','OUTPUT area'],answer:'24 square units. A reusable algorithm can use new length and width values on future runs.'},
+ {id:'3b',tone:'green',title:'Example 3B · Dimensions change, but area does not—yet',context:'Ask students to predict BOTH output values, not just the final one.',question:'What are the two outputs, and why?',cards:['SET length = 6','SET width = 4','SET area = length × width','SET length = length + 2','OUTPUT area','SET area = length × width','OUTPUT area'],answer:'First 24 square units, then 32 square units. The length changed to 8, but area stayed 24 until the calculation was run again.'},
+ {id:'4a',tone:'gold',title:'Example 4A · A simple decision',context:'Assume the die returns an integer from 1 to 6. Only one branch runs.',question:'What outputs occur for rolls 1–6?',cards:['ROLL die','SET roll = result','IF roll > 3','OUTPUT "HIGH"','ELSE','OUTPUT "LOW"','END IF'],answer:'Rolls 1, 2, and 3 output LOW. Rolls 4, 5, and 6 output HIGH.'},
+ {id:'4b',tone:'gold',title:'Example 4B · A conditional geometry calculation',context:'The die sets the length; the IF may update the width.',question:'Predict area for all six die outcomes.',cards:['ROLL die','SET length = result','SET width = 4','IF length > 3','SET width = 6','END IF','SET area = length × width','OUTPUT area'],answer:'Roll → area: 1→4, 2→8, 3→12, 4→24, 5→30, 6→36. Width is 4 for rolls 1–3 and 6 for rolls 4–6.'}
+];
+function el(tag,klass,text){const n=document.createElement(tag);if(klass)n.className=klass;if(text!==undefined)n.textContent=text;return n;}
+for(const ex of examples){
+ const root=document.getElementById('ex-'+ex.id), wrap=el('article','example');
+ const top=el('div','example-top'); const heading=el('div');heading.append(el('h3','',ex.title),el('p','context',ex.context));
+ const actions=el('div','actions'),next=el('button','primary','Reveal next'),reset=el('button','','Reset'),all=el('button','','Reveal all'),progress=el('span','progress','0 / '+ex.cards.length);
+ actions.append(next,reset,all,progress);top.append(heading,actions);
+ const q=el('p','question',ex.question),cards=el('div','cards');
+ const revealed=Array(ex.cards.length).fill(false);const buttons=[];
+ function update(){progress.textContent=revealed.filter(Boolean).length+' / '+revealed.length;next.disabled=revealed.every(Boolean);buttons.forEach((b,i)=>{b.classList.toggle('hidden-card',!revealed[i]);b.querySelector('.expression').textContent=revealed[i]?ex.cards[i]:'Click to reveal';b.querySelector('.hint').textContent=revealed[i]?'Click to hide':'Instruction hidden';b.setAttribute('aria-label',(revealed[i]?'Hide':'Reveal')+' card '+(i+1));});}
+ ex.cards.forEach((c,i)=>{const b=el('button','card hidden-card');b.type='button';b.dataset.tone=ex.tone;b.append(el('span','step','Card '+(i+1)),el('span','expression','Click to reveal'),el('span','hint','Instruction hidden'));b.addEventListener('click',()=>{revealed[i]=!revealed[i];update()});buttons.push(b);cards.append(b)});
+ next.addEventListener('click',()=>{const i=revealed.indexOf(false);if(i>=0){revealed[i]=true;update();}});
+ reset.addEventListener('click',()=>{revealed.fill(false);answer.hidden=true;answerButton.textContent='Show instructor answer';update()});
+ all.addEventListener('click',()=>{revealed.fill(true);update()});
+ const answerWrap=el('div','answer-wrap'),answerButton=el('button','answer-toggle','Show instructor answer'),answer=el('div','answer',ex.answer);answer.hidden=true;
+ answerButton.addEventListener('click',()=>{answer.hidden=!answer.hidden;answerButton.textContent=answer.hidden?'Show instructor answer':'Hide instructor answer'});
+ answerWrap.append(answerButton,answer);wrap.append(top,q,cards,answerWrap);root.append(wrap);update();
+}
+</script>
+</body>
+</html>
